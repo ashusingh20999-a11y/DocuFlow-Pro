@@ -5,6 +5,7 @@ pandas
 openpyxl
 PyMuPDF
 python-docx
+pdf2docx
 reportlab
 pypdf
 Pillow
