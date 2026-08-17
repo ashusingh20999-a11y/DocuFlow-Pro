@@ -33,6 +33,6 @@ async def convert(files: list[UploadFile]=File(...), target:str=Form(...)):
             with p.open("wb") as out: shutil.copyfileobj(f.file,out)
             saved.append(p)
         result=convert_file(saved,target,OUTPUTS/job)
-        return FileResponse(result,path=result,filename=result.name,media_type="application/octet-stream")
+        return FileResponse(result, filename=result.name, media_type="application/octet-stream")
     except Exception as e:
         raise HTTPException(500,str(e))
