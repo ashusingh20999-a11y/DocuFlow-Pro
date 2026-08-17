@@ -12,26 +12,21 @@
 <div class="tool"><div class="icon">🖼️</div><h3>Image Tools</h3><p class="muted">Images to PDF and PDF pages to images.</p></div>
 </div></div>
 <script>
-const f=document.getElementById('file'),n=document.getElementById('name'),s=document.getElementById('status'),go=document.getElementById('go');
+const f=document.getElementById('file'),n=document.getElementById('name'),s=document.getElementById('status'),go=document.getElementById('go'),target=document.getElementById('target');
 f.onchange=()=>n.textContent=f.files.length?(f.files.length+' file(s) selected'):'📁 Choose file(s)';
+function outputName(){const t=target.value; if(t==='docx')return 'converted.docx'; if(t==='xlsx')return 'converted.xlsx'; if(t==='csv')return 'converted.csv'; if(t==='merge_pdf')return 'merged.pdf'; if(t==='split_pdf')return 'split_pages.zip'; if(t==='image_pdf')return 'images.pdf'; if(t==='jpg')return 'pdf_images.zip'; return 'converted.pdf';}
 go.onclick=async()=>{
  if(!f.files.length){s.textContent='Please choose a file.';return}
- const fd=new FormData(); for(const x of f.files)fd.append('files',x); fd.append('target',document.getElementById('target').value);
+ const fd=new FormData(); for(const x of f.files)fd.append('files',x); fd.append('target',target.value);
  go.disabled=true; go.textContent='Processing…'; s.textContent='Uploading and converting. Please wait…';
  try{
    const r=await fetch('/convert',{method:'POST',body:fd});
    const type=r.headers.get('content-type')||'';
-   if(!r.ok){
-     let msg='Conversion failed.';
-     if(type.includes('application/json')){const j=await r.json();msg=j.detail||msg}else{msg=(await r.text()).slice(0,300)||msg}
-     throw new Error(msg)
-   }
-   const b=await r.blob();
-   if(!b.size) throw new Error('Server returned an empty file.');
-   const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='docuflow-result';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
-   s.textContent='✓ Conversion complete. Download started.';
- }catch(e){
-   s.textContent=e.name==='TypeError'?'✕ Server connection failed. Render service may be restarting—wait for deployment to finish and try again.':'✕ '+e.message;
- }finally{go.disabled=false;go.textContent='Convert & Download'}
+   if(!r.ok){let msg='Conversion failed.'; if(type.includes('application/json')){const j=await r.json();msg=j.detail||msg}else{msg=(await r.text()).slice(0,300)||msg} throw new Error(msg)}
+   const b=await r.blob(); if(!b.size)throw new Error('Server returned an empty file.');
+   const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=outputName();a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);
+   s.textContent='✓ Conversion complete. File downloaded as '+outputName();
+ }catch(e){s.textContent=e.name==='TypeError'?'✕ Server connection failed. Please wait for Render deployment and try again.':'✕ '+e.message}
+ finally{go.disabled=false;go.textContent='Convert & Download'}
 };
 </script></body></html>
