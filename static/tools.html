@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>All Tools · DocuFlow Pro</title><link rel="stylesheet" href="/static/style.css"></head><body>
+<nav class="nav"><a class="logo" href="/">Docu<span>Flow</span> Pro</a><a class="btn" href="/">Home</a></nav>
+<div class="container"><div class="section-title"><h1>All Document Tools</h1><p class="muted">Choose a tool, upload your file and download the result.</p></div>
+<div class="workspace">
+<label class="upload"><input id="file" type="file" multiple accept=".pdf,.docx,.xlsx,.xls,.csv,.jpg,.jpeg,.png"><div class="drop-title" id="name">📁 Choose file(s)</div><p class="muted">Drag & drop or tap to browse</p></label>
+<div class="select"><select id="target">
+<option value="pdf">Word / Excel / CSV → PDF</option><option value="docx">PDF → Word</option><option value="xlsx">PDF → Excel</option><option value="xlsx">CSV → Excel</option><option value="csv">Excel → CSV</option><option value="merge_pdf">Merge PDFs</option><option value="split_pdf">Split PDF</option><option value="image_pdf">Images → PDF</option><option value="jpg">PDF → Images (ZIP)</option>
+</select></div><button class="btn" id="go" style="width:100%">Convert & Download</button><div class="status" id="status"></div></div>
+<div style="height:30px"></div><div class="tools">
+<div class="tool"><div class="icon">📄</div><h3>PDF Tools</h3><p class="muted">Convert, merge, split and export pages.</p></div>
+<div class="tool"><div class="icon">📝</div><h3>Office Tools</h3><p class="muted">Word and spreadsheet conversion.</p></div>
+<div class="tool"><div class="icon">🖼️</div><h3>Image Tools</h3><p class="muted">Images to PDF and PDF pages to images.</p></div>
+</div></div>
+<script>
+const f=document.getElementById('file'),n=document.getElementById('name'),s=document.getElementById('status');
+f.onchange=()=>n.textContent=f.files.length?(f.files.length+' file(s) selected'):'📁 Choose file(s)';
+document.getElementById('go').onclick=async()=>{
+if(!f.files.length){s.textContent='Please choose a file.';return}
+const fd=new FormData();for(const x of f.files)fd.append('files',x);fd.append('target',document.getElementById('target').value);
+s.textContent='Processing…';
+try{const r=await fetch('/convert',{method:'POST',body:fd});if(!r.ok){let j=await r.json().catch(()=>({}));throw Error(j.detail||'Conversion failed')}
+const b=await r.blob(),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='docuflow-result';a.click();URL.revokeObjectURL(u);s.textContent='✓ Done. Your file is ready.'}catch(e){s.textContent='✕ '+e.message}};
+</script></body></html>
